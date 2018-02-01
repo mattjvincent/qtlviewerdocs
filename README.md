@@ -1,18 +1,44 @@
+
 # QTL Viewer
-===================
+
 
 This is a web application that renders QTL "type" data.  There are multiple components and moving parts, but 2 different main projects make up the QTL Viewer: **QTL API** and **QTL Web**.
 
-===================
 
 ## QTL API
 
-The QTL API utilizes the following technology stack:
+### Overview
+[Docker](http://www.docker.com/) and [Docker Compose](http://docs.docker.com/compose/) are the recommended way of running the QTL API so it can be easily managed.  A [Docker](http://www.docker.com/) image for the QTL API can be found on [Docker Hub]( https://hub.docker.com/) at [mattjvincent/rqtlapi](https://hub.docker.com/r/mattjvincent/rqtlapi/).
+
+This image contains all the necessary code to run the QTL API. An example [docker-compose.yml](https://docs.docker.com/compose/compose-file/) can be found in the [churchill-lab/qtlapi](http://github.com/churchill-lab/qtlapi) [GitHub](http://github.com/) repository.
+
+An example to start this [Docker](http://www.docker.com/)  image is:
+
+    docker run --rm -p 8000:8000 --network netapi \
+               -v /path/to/my.RData:/app/qtlapi/data/data.RData \
+               -v /path/to/ccfoundersnps.sqlite:/app/qtlapi/data/ccfounders.sqlite \
+               -v /path/to/qtlapi.R:/app/qtlapi/qtlapi.R \
+               mattjvincent/qtlapi /app/qtlapi/qtlapi.R
+
+For more in depth documentation, please refer to [churchill-lab/qtlapi](http://github.com/churchill-lab/qtlapi).
+
+----------
+
+### Tech Stack
 
 * [Docker](http://www.docker.com/) - Build, Ship, and Run Any App, Anywhere 
 * [R](http://www.r-project.org/) - number cruncher
 * [R/qtl2](http://kbroman.org/qtl2/) - Analysis 
 * [Plumber](http://www.rplumber.io/) - Help turn R code into Web based API
+
+
+----------
+
+
+### Data
+Behind the QTL API is a **RData** file which MUST be formatted according to the following definition: [QTL API Data File Definition](https://github.com/churchill-lab/qtlapi/blob/master/docs/QTLAPIDataStructures.md)
+
+----------
 
 ### Endpoints
 
@@ -20,11 +46,13 @@ The API generated is used by the QTL Web app.  The following API's are supplied:
 
 #### /datasets
 
-Description: The initial API called by QTL Web.  The data returned is dependent upon if the "dataType" is "mRNA", "protein", or "phenotype". The purpose of this API is to define and describe the datasets used in the viewer.
+**Description**: This is the initial API called by QTL Web.  The data returned is dependent upon if the **dataType** is `mRNA`, `protein`, or `phenotype`. The purpose of this API is to define and describe the datasets used in the viewer.
 
-Parameters: None
+**Parameters**: None
 
-Example response:
+**Response**: The response will be JSON.
+
+**Example response:**
 ```
 {"dataSets": [{
     "id": "some.dataset.identifier",
@@ -52,11 +80,14 @@ Example response:
 }
 ```
 
+----------
+
+
 #### /lodscan
 
-Description: Perform a LOD Scan.
+**Description**: Perform a LOD Scan.
 
-Parameters:
+**Parameters**:
 
 | Parameter | Description |
 | ------ | ------ |
@@ -66,8 +97,9 @@ Parameters:
 | nCores | number of cores to use |
 | expand | TRUE to expand the JSON, FALSE to condense |
 
-Example response (expanded):
+**Response**: The response will be JSON.
 
+**Example Response**:
 ```
 {"result": [
     {"id":"1_4530778","chr":"1","pos":4.5308,"lod":1.688},
@@ -79,11 +111,13 @@ Example response (expanded):
 }
 ```
 
+----------
+
 #### /foundercoefs
 
-Description: Get founder coefficients.
+**Description**: Get founder coefficients.
 
-Parameters:
+**Parameters**:
 
 | Parameter | Description |
 | ------ | ------ |
@@ -96,7 +130,9 @@ Parameters:
 | nCores | number of cores to use |
 | expand | TRUE to expand the JSON, FALSE to condense |
 
-Example response (expanded):
+**Response**: The response will be JSON.
+
+**Example Response**:
 
 ```
 {"result":[{"id":"2_4292516","chr":"2","pos":4.2925,
@@ -114,18 +150,22 @@ Example response (expanded):
 }
 ```
 
+----------
+
 #### /expression
 
-Description: Get the expression data.
+**Description**: Get the expression data.
 
-Parameters:
+**Parameters**:
 
 | Parameter | Description |
 | ------ | ------ |
 | dataset | dataset identifier |
 | id | the identifer to perform LOD scan on |
 
-Example response:
+**Response**: The response will be JSON.
+
+**Example Response**:
 
 ```
 {"data":[{"mouse_id":"F01","Sex":"F","Generation":"G4","Litter":2,
@@ -139,12 +179,13 @@ Example response:
  "time":2.3
 }
 ```
+----------
 
 #### /mediate
 
-Description: Perform mediation analysis.
+**Description**: Perform mediation analysis.
 
-Parameters:
+**Parameters**:
 
 | Parameter | Description |
 | ------ | ------ |
@@ -153,8 +194,9 @@ Parameters:
 | mid | marker identifier |
 | expand | TRUE to expand the JSON, FALSE to condense |
 
-Example response:
+**Response**: The response will be JSON.
 
+**Example Response**:
 ```
 {"result":[{"gene_id":"ENSMUSG00000000001","symbol":"Gnai3",
             "chr":"3","pos":108.1267,"LOD":1.3625},
@@ -167,12 +209,13 @@ Example response:
  "time":10.3
 }
 ```
+----------
 
 #### /snpassoc
 
-Description: SNP Association Mappting
+**Description**: SNP Association Mappting
 
-Parameters:
+**Parameters**:
 
 | Parameter | Description |
 | ------ | ------ |
@@ -184,7 +227,10 @@ Parameters:
 | nCores | number of cores to use |
 | expand | TRUE to expand the JSON, FALSE to condense |
 
-Example response:
+**Response**: The response will be JSON.
+
+**Example Response**:
+
 
 ```
 {"result":[{"snp":"rs245710663","chr":"1","pos":14.5001,
@@ -205,18 +251,24 @@ Example response:
 }
 ```
 
+
+----------
+
+
 #### /lodpeaks
 
-Description: Peak LOD scors for a dataset.
+**Description**: Peak LOD scors for a dataset.
 
-Parameters:
+**Parameters**:
 
 | Parameter | Description |
 | ------ | ------ |
 | dataset | dataset identifier |
 | expand | TRUE to expand the JSON, FALSE to condense |
 
-Example response:
+**Response**: The response will be JSON.
+
+**Example Response**:
 
 ```
  {"result":[
@@ -236,11 +288,26 @@ Example response:
   "time":3.9
 }
 ```
-===================
+----------
 
 ## QTL Web
 
-The QTL Web utilizes the following technology stack:
+### Overview
+[Docker](http://www.docker.com/) and [Docker Compose](http://docs.docker.com/compose/) are the recommended way of running the QTL Web so it can be easily managed.  A [Docker](http://www.docker.com/) image for the QTL API can be found on [Docker Hub]( https://hub.docker.com/) at [mattjvincent/rqtlweb](https://hub.docker.com/r/mattjvincent/rqtlweb/).
+
+This image contains all the necessary code to run the QTL Web. An example [docker-compose.yml](https://docs.docker.com/compose/compose-file/) can be found in the [churchill-lab/qtlapi](http://github.com/churchill-lab/qtlweb) [GitHub](http://github.com/) repository.
+
+An example to start this [Docker](http://www.docker.com/)  image is:
+
+    docker-compose up --scale api=3
+
+For more in depth documentation, please refer to [churchill-lab/qtlweb](http://github.com/churchill-lab/qtlweb).
+
+
+----------
+
+
+### Tech Stack
 
 * [Docker](http://www.docker.com/) - Build, Ship, and Run Any App, Anywhere 
 * [Python](http://www.python.org/) - Web framework
@@ -248,6 +315,5 @@ The QTL Web utilizes the following technology stack:
 * [Redis](http://redis.io/) - Message Broker
 * [Bootstrap 4](http://getbootstrap.com/) - HTML enhanced for web apps!
 
-===================
 
 
